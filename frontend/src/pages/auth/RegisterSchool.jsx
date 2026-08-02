@@ -49,7 +49,7 @@ export default function RegisterSchool() {
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-ink/60">Votre nom (directeur / directrice)</label>
-            <Input required value={form.adminName} onChange={set("adminName")} placeholder="Aminata Kone" />
+            <Input required value={form.adminName} onChange={set("adminName")} placeholder="Moussa Ndiaye" />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-ink/60">Email</label>
@@ -57,7 +57,7 @@ export default function RegisterSchool() {
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-ink/60">Telephone</label>
-            <Input value={form.phone} onChange={set("phone")} placeholder="+225 07 00 00 00" />
+            <Input value={form.phone} onChange={set("phone")} placeholder="+221 000 00 00" />
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-ink/60">Mot de passe</label>
