@@ -42,7 +42,7 @@ export default function Layout({ children }) {
             </div>
             <div>
               <p className="font-display text-lg leading-tight"> GESTION SCOLAIRE</p>
-              <p className="text-xs text-board-light/80 opacity-70">Gestion Scolaire</p>
+              <p className="text-xs text-board-light/80 opacity-70">Ecole SaaS</p>
             </div>
           </div>
           <nav className="flex flex-col gap-1">
