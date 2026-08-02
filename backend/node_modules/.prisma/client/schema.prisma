@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  TEACHER
+  PARENT
+}
+
+model Tenant {
+  id            String         @id @default(uuid())
+  name          String
+  slug          String         @unique
+  address       String?
+  phone         String?
+  email         String?
+  plan          String         @default("BASIC") // BASIC, STANDARD, PREMIUM
+  status        String         @default("ACTIVE") // ACTIVE, SUSPENDED
+  createdAt     DateTime       @default(now())
+  users         User[]
+  students      Student[]
+  classes       SchoolClass[]
+  subjects      Subject[]
+  academicYears AcademicYear[]
+  invoices      Invoice[]
+  grades        Grade[]
+  attendances   Attendance[]
+}
+
+model User {
+  id            String          @id @default(uuid())
+  tenantId      String?
+  tenant        Tenant?         @relation(fields: [tenantId], references: [id])
+  email         String          @unique
+  password      String
+  name          String
+  phone         String?
+  role          Role
+  createdAt     DateTime        @default(now())
+  classesTaught SchoolClass[]   @relation("TeacherClasses")
+  children      StudentParent[]
+}
+
+model AcademicYear {
+  id        String        @id @default(uuid())
+  tenantId  String
+  tenant    Tenant        @relation(fields: [tenantId], references: [id])
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean       @default(true)
+  classes   SchoolClass[]
+}
+
+model SchoolClass {
+  id             String       @id @default(uuid())
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id])
+  name           String
+  level          String
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  teacherId      String?
+  teacher        User?        @relation("TeacherClasses", fields: [teacherId], references: [id])
+  students       Student[]
+  attendances    Attendance[]
+}
+
+model Subject {
+  id       String  @id @default(uuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+  name     String
+  grades   Grade[]
+}
+
+model Student {
+  id          String          @id @default(uuid())
+  tenantId    String
+  tenant      Tenant          @relation(fields: [tenantId], references: [id])
+  firstName   String
+  lastName    String
+  birthDate   DateTime
+  gender      String?
+  classId     String?
+  class       SchoolClass?    @relation(fields: [classId], references: [id])
+  parents     StudentParent[]
+  grades      Grade[]
+  attendances Attendance[]
+  invoices    Invoice[]
+  createdAt   DateTime        @default(now())
+}
+
+model StudentParent {
+  id        String  @id @default(uuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+  parentId  String
+  parent    User    @relation(fields: [parentId], references: [id])
+
+  @@unique([studentId, parentId])
+}
+
+model Grade {
+  id        String   @id @default(uuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  value     Float
+  maxValue  Float    @default(20)
+  term      String
+  comment   String?
+  date      DateTime @default(now())
+}
+
+model Attendance {
+  id        String      @id @default(uuid())
+  tenantId  String
+  tenant    Tenant      @relation(fields: [tenantId], references: [id])
+  studentId String
+  student   Student     @relation(fields: [studentId], references: [id])
+  classId   String
+  class     SchoolClass @relation(fields: [classId], references: [id])
+  date      DateTime
+  status    String
+  note      String?
+
+  @@unique([studentId, date])
+}
+
+model Invoice {
+  id          String    @id @default(uuid())
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  studentId   String
+  student     Student   @relation(fields: [studentId], references: [id])
+  description String
+  amount      Float
+  dueDate     DateTime
+  status      String    @default("PENDING")
+  payments    Payment[]
+  createdAt   DateTime  @default(now())
+}
+
+model Payment {
+  id        String   @id @default(uuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+  amount    Float
+  method    String
+  date      DateTime @default(now())
+  reference String?
+}
